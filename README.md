@@ -1,5 +1,5 @@
-`Imagio` — image processing service written in Go.
---------------------------------------------------
+Image processing web service in Go.
+-----------------------------------
 
 #### It uses:
   - [OpenCV](http://opencv.org/) for image processing.
@@ -36,8 +36,8 @@ If You don't have OpenCV and don't plan to use it further, just follow step 2.1.
  
 ### 2.1 Using statically linked OpenCV libraries from the package.
 + Download the package
-  - [OSX version, imagio v.0.1](releases/download/0.1/imagio-0.1-247.osx.tar.gz)
-  - [Linux version, imagio v.0.1](releases/download/0.1/imagio-0.1-247.lin.tar.gz)
+  - [OSX version, imagio v.0.1](https://github.com/3d0c/imagio/releases/download/0.1/imagio-0.1-247.osx.tar.gz)
+  - [Linux version, imagio v.0.1](https://github.com/3d0c/imagio/releases/download/0.1/imagio-0.1-247.lin.tar.gz)
   
 Be sure, that GOROOT and GOPATH variables are set, and run script inside the imagio directory.
 ```sh
