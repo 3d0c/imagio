@@ -1,5 +1,5 @@
-Image processing web service in Go.
------------------------------------
+Image processing web service.
+-----------------------------
 
 #### It uses:
   - [OpenCV](http://opencv.org/) for image processing.
@@ -9,10 +9,10 @@ Image processing web service in Go.
 #### Right now it can:  
   - Scale images
   - Crop images
-  - Format conversion (jpg,png)
+  - Convert formats (jpg,png)
    
 #### It's pretty fast.
-  - Thanks to OpenCV, it could resize (downscale) 140 FullHD images per second. (tested on 3.2Ghz Xeon).
+  - Thanks to OpenCV, it could resize (downscale) up to 140 FullHD images per second. (tested on 3.2Ghz Xeon).
   - Thanks to GroupCache and Go http server, it could serve up to 20k requests per second.
 
 #### It scales well.
@@ -23,7 +23,7 @@ Installation.
 ### Prerequisite.
 + [Mercurial](http://mercurial.selenic.com/)
 + [Go](http://golang.org/)
-+ [Gcc](http://gcc.gnu.org/), You will need C and C++ compilers.
++ [Gcc](http://gcc.gnu.org/) — You will need C and C++ compilers.
 
 ### 1. Install GroupCache.
 ```sh
@@ -48,8 +48,22 @@ That's all. You will get ready to use `imagio` binary.
 ### 2.2 Using shared OpenCV libraries
 Install OpenCV and ensure that pkgconfig file is available, add it to PKG_CONFIG_PATH if needed.
 ```sh
-export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/usr/local/opencv-2.4.7/lib/pkgconfig
+# check it
+pkg-config --libs opencv
 ```
+```sh
+# If You see an error about 'opencv.pc', run the following command
+# with corresponding opencv path:
+export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/usr/local/opencv-2.4.7/lib/pkgconfig
+
+```  
+
+In couse of this bug [Bug #1925](http://code.opencv.org/issues/1925), You should patch opencv.pc by running following command:
+```sh
+# copy-paste it
+pcPrefix=`grep "prefix=" $PKG_CONFIG_PATH/opencv.pc | grep -v exec | sed 's/prefix=//g'`;pcLibs=`grep "Libs: " $PKG_CONFIG_PATH/opencv.pc`" -L$pcPrefix/lib";sed -i.old 's#libdir=#libdir='"$pcPrefix/lib"'#g' $PKG_CONFIG_PATH/opencv.pc;sed -i.old 's#Libs:.*#'$pcLibs'#g' $PKG_CONFIG_PATH/opencv.pc
+```  
+
 Install package by running:
 ```sh
 go get github.com/3d0c/imagio
