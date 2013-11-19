@@ -55,48 +55,52 @@ pkg-config --libs opencv
 # If You see an error about 'opencv.pc', run the following command
 # with corresponding opencv path:
 export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/usr/local/opencv-2.4.7/lib/pkgconfig
-
 ```  
 
 In couse of this bug [Bug #1925](http://code.opencv.org/issues/1925), You should patch opencv.pc by running following command:
 ```sh
 # copy-paste it
-pcPrefix=`grep "prefix=" $PKG_CONFIG_PATH/opencv.pc | grep -v exec | sed 's/prefix=//g'`;pcLibs=`grep "Libs: " $PKG_CONFIG_PATH/opencv.pc`" -L$pcPrefix/lib";sed -i.old 's#libdir=#libdir='"$pcPrefix/lib"'#g' $PKG_CONFIG_PATH/opencv.pc;sed -i.old 's#Libs:.*#'$pcLibs'#g' $PKG_CONFIG_PATH/opencv.pc
+pcPrefix=`grep "prefix=" $PKG_CONFIG_PATH/opencv.pc | grep -v exec | sed 's/prefix=//g'`;pcLibs=`grep "Libs: " $PKG_CONFIG_PATH/opencv.pc`" -L$pcPrefix/lib";sed -i.old 's#libdir=#libdir='"$pcPrefix/lib"'#g' $PKG_CONFIG_PATH/opencv.pc;sed -i.old 's#Libs:.*#'"$pcLibs"'#g' $PKG_CONFIG_PATH/opencv.pc
 ```  
 
-Install package by running:
 ```sh
+# Install package by running:
 go get github.com/3d0c/imagio
+
+# Run it
+$GOPATH/bin/imagio
 ```
 
 Usage.
 ------
-Example:
+For example:
 ```sh
-http://localhost:15900/?scale=800x&quality=80&source=farm5.staticflickr.com/4130/5088414872_0856bb93ed_o.jpg
+curl -o test-800.jpg \
+  http://localhost:15900/\?scale=800x\&quality=80 \
+  \&source=farm5.staticflickr.com/4130/5088414872_0856bb93ed_o.jpg
 ```
-As a result You will get a downscaled 800 px width jpeg, saved with 80% quality.  
+You will get a downscaled to 800 px width jpeg, saved with 80% quality.  
 
 ### Available options:
 1. **source**  
   Possible values:
   + `http://some.host.com/1.jpg`
-  + `some.host.com/1.jpg` — scheme could be ommitted, http scheme is default)
+  + `some.host.com/1.jpg` — scheme could be ommitted, http scheme is default
   + `1.jpg` — host could be ommitted, if it given in config
   + `file://some/path/1.jpg` root option should be defined in config file, default is `/tmp`
 
 2. **scale**  
   Prototype: `([0-9]+x) or (x[0-9]+) or ([0-9]+) or (0.[0-9]+)`  
   E.g.:
-  + 800x  width 800px, height will be calculated
-  + x600  height 600px, width will be calculated
-  + 640   maximum dimension is 640px, e.g. original 1024x768 pixel image will be scaled to 640x480,
-          same option applied for 900x1600 image results 360x640
-  + 0.5   50% of original dimensions, e.g. 1024x768 = 512x384
+  + `800x` scale to width 800px, height will be calculated
+  + `x600` scale to height 600px, width will be calculated
+  + `640`  maximum dimension is 640px, e.g. original 1024x768 pixel image will be scaled to 640x480,
+           same option applied for 900x1600 image results 360x640
+  + `0.5`  50% of original dimensions, e.g. 1024x768 = 512x384
 
 3. **crop**  
   Prototype: `crop=x,y,width,height`  
-  + `x,y` is a coordinates of top left corner of crop ROI and could be replaced by one of following shortcuts:
+  + `x,y` are the coordinates of top left corner of crop ROI and could be replaced by one of the following shortcuts:
     - `left`
     - `bleft`
     - `right`
@@ -106,11 +110,14 @@ As a result You will get a downscaled 800 px width jpeg, saved with 80% quality.
     - &crop=15,20,200,200
     - &crop=center,500,500
 
-4. **quality** Integer value from 0 to 100. (more is better)
+4. **quality**  
+   Jpeg quality. Integer value from 0 to 100. (more is better)
 
-5. **format** `jpg` or `png`. Could be omitted if no format conversion needed.
+5. **format**  
+   `jpg` or `png`. Could be omitted if no format conversion needed.
 
-6.  **method** Scaling method. Default is Bicubic  
+6.  **method**  
+   Scaling method. Default is Bicubic.  
    Possible values:
     - `1` Nearest-neighbor interpolation
     - `2` Bilinear interpolation
@@ -122,7 +129,7 @@ As a result You will get a downscaled 800 px width jpeg, saved with 80% quality.
 If You need to change some default behavior, create an imagio.conf by running:
 ```
 imagio -dumpcfg
-```
+```  
 It will create a default config file in the same directory:
 ```json
 {
@@ -153,5 +160,6 @@ It will create a default config file in the same directory:
 ```
 It's pretty straightforward. Few comments:
 - to use local files, You should setup the `root` option in `file` section
+- to omit host in http scheme, define `root` in `http` section
 - Groupcache `peers` is an array of strings, e.g. `"peers" : ["host1:9100", "host2:9100"]`
 - Groupcache `size` option supports `M` for Megabytes and `G` for Gigabytes
