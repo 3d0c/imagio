@@ -19,15 +19,17 @@ CvMat *overlayImage(CvMat *bgMat, IplImage *bgImg, const CvMat *fgMat, const Ipl
 
     int loc_x = (roi->x > 0) ? roi->x : 0;
     int loc_y = (roi->y > 0) ? roi->y : 0;
+
+    int y, x, c;
     
-    for(int y = loc_y; y < bgMat->rows; y++) {
+    for(y = loc_y; y < bgMat->rows; y++) {
         int fY = y - roi->y;
 
         if(fY >= fgMat->rows) {
             break;
         }
 
-        for(int x = loc_x; x < bgMat->cols; x++) {
+        for(x = loc_x; x < bgMat->cols; x++) {
             int fX = x - roi->x;
 
             if(fX >= fgMat->cols) {
@@ -42,7 +44,7 @@ CvMat *overlayImage(CvMat *bgMat, IplImage *bgImg, const CvMat *fgMat, const Ipl
                 opacity = ((double)fgMat->data.ptr[fY * fgMat->step + fX * fgImg->nChannels + 3]) / 255.;
             }
 
-            for(int c = 0; opacity > 0 && c < bgImg->nChannels; c++) {
+            for(c = 0; opacity > 0 && c < bgImg->nChannels; c++) {
                 unsigned char foregroundPx = fgMat->data.ptr[fY * fgMat->step + fX * fgImg->nChannels + c];
                 unsigned char backgroundPx = bgMat->data.ptr[y * bgMat->step + x * bgImg->nChannels + c];
                 resultMat->data.ptr[y*resultMat->step + bgImg->nChannels*x + c] = backgroundPx * (1.-opacity) + foregroundPx * opacity;
