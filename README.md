@@ -1,5 +1,7 @@
 Image processing web service.
 -----------------------------
+### Version 0.2 Changes:
+  - Alpha blending with a mask.
 
 #### It uses:
   - [OpenCV](http://opencv.org/) for image processing.
@@ -10,7 +12,9 @@ Image processing web service.
   - Scale images
   - Crop images
   - Convert formats (jpg,png)
-   
+  - Blend images, optionally with a mask. [See examples](#blending-examples)
+  - Apply watermark
+
 #### It's pretty fast.
   - Thanks to OpenCV, it could resize (downscale) up to 140 FullHD images per second. (tested on 3.2Ghz Xeon).
   - Thanks to GroupCache and Go http server, it could serve up to 20k requests per second.
@@ -20,7 +24,7 @@ Image processing web service.
 
 Installation.
 -------------
-### Prerequisite.
+### Prerequisites.
 + [Mercurial](http://mercurial.selenic.com/)
 + [Go](http://golang.org/)
 + [Gcc](http://gcc.gnu.org/) — You will need C and C++ compilers.
@@ -125,6 +129,20 @@ You will get a downscaled to 800 px width jpeg, saved with 80% quality.
     - `4` Area based interpolation
     - `5` Lanczos resampling
 
+7.  **blend_with**
+    Source for image, which will blended with the source image. 
+
+8.  **blend_mask**
+    Source for mask file.
+
+9.  **blend_roi** 
+    (x,y) coordinates of the top left corner or one of the following shortcuts: `left`, `bleft`, `right`, `bright`, `center`
+    Default is (0,0)
+
+10. **blend_alpha**
+    Desired froreground image transparency. 
+    from 0.0 to 1.0 double. Use it only for blending two images without alpha channel. (See examples.) 
+
 ### imagio.conf
 If You need to change some default behavior, create an imagio.conf by running:
 ```
@@ -148,7 +166,8 @@ It will create a default config file in the same directory:
     "defaults": {
         "format": "jpeg",
         "method": 3,
-        "quality": 80
+        "quality": 80,
+        "blend_alpha": 0.5
     },
     
     "groupcache": {
@@ -163,3 +182,41 @@ It's pretty straightforward. Few comments:
 - to omit host in http scheme, define `root` in `http` section
 - Groupcache `peers` is an array of strings, e.g. `"peers" : ["host1:9100", "host2:9100"]`
 - Groupcache `size` option supports `M` for Megabytes and `G` for Gigabytes
+
+### Watermark
+To get a persistent watermark on every image add `blend` section to the config file. E.g.:
+```javascript
+    "blend": {
+        "with": "file://watermark.png",              // 'source->root' should be configured
+        //      "http://localhost/watermark.png",    // or common http url
+        
+        "mask": "file://mask.png",
+        //      "http://localhost/mask.png"
+        
+        "roi": "0,0"
+    }
+```
+Note, 
+- that `blend_alpha` settings is in defaults section.
+- that watermark will be applied after scale and crop operations
+
+### Blending examples
+
++ Alpha Blending with a mask. 
+
+| `&source=` | `&blend_with=` | `&blend_mask=` | result |
+|:------:|:-------------------:|:----:|:------:|
+| ![base](https://raw.github.com/wiki/3d0c/imagio/assets/sample250.jpg) |  250x250 white    | ![mask](https://raw.github.com/wiki/3d0c/imagio/assets/mask250.png) | ![result](https://raw.github.com/wiki/3d0c/imagio/assets/sample250mask.jpeg) |
+
++ Blend RGB and RGBA. In this examples, foreground is a PNG-24 with transparent background. 
+ 
+| `&source=` | `&blend_with=`  | result |
+|:------:|:-----------:|:------:|
+| ![base](https://raw.github.com/wiki/3d0c/imagio/assets/sample250.jpg) | ![foreground](https://raw.github.com/wiki/3d0c/imagio/assets/awesome-t.png) | ![result](https://raw.github.com/wiki/3d0c/imagio/assets/sample250overlayT.png)
+
++ Blend RGB images. In this examples both images are simple jpeg. You could simulate foreground tranparency with `blend_alpha` option, by default it's `0.5`. 
+
+| `&source=` | `&blend_with=`  | result |
+|:------:|:-----------:|:------:|
+| ![base](https://raw.github.com/wiki/3d0c/imagio/assets/sample250.jpg) | ![foreground](https://raw.github.com/wiki/3d0c/imagio/assets/awesome.jpg) | ![result](https://raw.github.com/wiki/3d0c/imagio/assets/sample250weighted.jpeg) | 
+

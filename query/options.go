@@ -12,16 +12,20 @@ import (
 var supportedOptions = map[string]interface{}{
 	"jpeg": "jpeg", "jpg": "jpeg", "png": "png", "gif": "gif", "json": "json",
 	"NN": 1, "LINEAR": 2, "CUBIC": 3, "AREA": 4, "LANCZOS": 5,
-	"true": true, "false": false,
+	"true": true, "false": false, "alpha": 0.5,
 }
 
 type Options struct {
-	Source  *Source
-	Scale   *Scale
-	Crop    *Crop
-	Format  string
-	Method  int
-	Quality int
+	Base       *Source
+	Scale      *Scale
+	CropRoi    *Roi
+	Format     string
+	Method     int
+	Quality    int
+	Alpha      float64
+	Foreground *Source
+	Mask       *Source
+	BlendRoi   *Roi
 }
 
 func (*Options) Construct(i ...interface{}) *Options {
@@ -55,14 +59,20 @@ func (*Options) Construct(i ...interface{}) *Options {
 
 func parseQuery(u *url.URL) *Options {
 	query := u.Query()
-
+	log.Println("in:", u.String())
 	this := &Options{
-		Crop:    Construct(new(Crop), query.Get("crop")).(*Crop),
+		CropRoi: Construct(new(Roi), query.Get("crop")).(*Roi),
 		Scale:   Construct(new(Scale), query.Get("scale")).(*Scale),
-		Source:  Construct(new(Source), query.Get("source")).(*Source),
+		Base:    Construct(new(Source), query.Get("source")).(*Source),
+
 		Format:  get(query.Get("format"), config.Get().Format()).(string),
 		Method:  get(query.Get("method"), config.Get().Method()).(int),
+		Alpha:   getFloat(query.Get("blend_alpha"), config.Get().Alpha()),
 		Quality: getInt(query.Get("quality"), config.Get().Quality()),
+
+		Foreground: Construct(new(Source), config.Get().BlendWith(query.Get("blend_with"))).(*Source),
+		Mask:       Construct(new(Source), config.Get().BlendMask(query.Get("blend_mask"))).(*Source),
+		BlendRoi:   Construct(new(Roi), config.Get().BlendRoi(query.Get("blend_roi"))).(*Roi),
 	}
 
 	return this
@@ -70,6 +80,14 @@ func parseQuery(u *url.URL) *Options {
 
 func get(key string, def interface{}) interface{} {
 	if val, found := supportedOptions[key]; found {
+		return val
+	}
+
+	return def
+}
+
+func getFloat(key string, def float64) float64 {
+	if val, err := strconv.ParseFloat(key, 64); err == nil {
 		return val
 	}
 

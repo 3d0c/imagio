@@ -1,13 +1,13 @@
 #include "cv_handler.h"
 
-Blob *cv_handler(Blob *in, PixelDim *zoom, int quality, int method, const char *format, ROI *roi) {
+Blob *resizer(Blob *in, PixelDim *zoom, int quality, int method, const char *format, CvRect *roi) {
 	if (!in) {
-		fprintf(stderr, "cv_handler.c: Wrong call. 'in' is NULL\n");
+		fprintf(stderr, "resizer.c: Wrong call. 'in' is NULL\n");
 		return NULL;
 	}
 
 	if (!zoom && !roi) {
-		fprintf(stderr, "cv_handler.c: Wrong call. 'zomm' and 'roi' are NULL\n");
+		fprintf(stderr, "resizer.c: Wrong call. 'zomm' and 'roi' are NULL\n");
 		return NULL;
 	}
 
@@ -23,19 +23,19 @@ Blob *cv_handler(Blob *in, PixelDim *zoom, int quality, int method, const char *
 	cvReleaseMat(&buf);
 
 	if(!srcImg) {
-		fprintf(stderr, "cv_handler.c: cvDecodeImage() error.\n");
+		fprintf(stderr, "resizer.c: cvDecodeImage() error.\n");
 		return NULL;
 	}
 
 	if(roi) {
-		cvSetImageROI(srcImg, cvRect(roi->X, roi->Y, roi->width, roi->height));
+		cvSetImageROI(srcImg, *roi);
 	}
 
 	int width = (zoom) ? zoom->width : roi->width;
 	int height = (zoom) ? zoom->height : roi->height;
 
 	if(!(resultImg = cvCreateImage(cvSize(width, height), srcImg->depth, srcImg->nChannels))) {
-		fprintf(stderr, "cv_handler.c: cvCreateImage error.\n");
+		fprintf(stderr, "resizer.c: cvCreateImage error.\n");
 		cvReleaseImage(&srcImg);
 		return NULL;
 	}

@@ -31,7 +31,6 @@ func (*Scale) Construct(i ...interface{}) *Scale {
 
 	v := i[0].([]interface{})[0].(string)
 	if v == "" {
-		log.Printf("Illegal scale option '%v'\n", v)
 		return nil
 	}
 
@@ -106,8 +105,4 @@ func (this *Scale) Size(src *PixelDim) *PixelDim {
 	}
 
 	return &PixelDim{Width: src.Width, Height: src.Height}
-}
-
-func init() {
-	log.SetFlags(log.Lshortfile | log.Ldate | log.Ltime)
 }

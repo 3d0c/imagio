@@ -13,6 +13,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"reflect"
 	"strings"
 )
 
@@ -27,8 +28,7 @@ var readers = map[string]func(string) (io.Reader, error){
 }
 
 type Source struct {
-	BlobLen int
-
+	BlobLen  int
 	scheme   string
 	root     string
 	filepath string
@@ -44,12 +44,30 @@ func (*Source) Construct(i ...interface{}) *Source {
 		return nil
 	}
 
+	v := i[0].([]interface{})[0]
+	source := &Source{}
+
+	switch v.(type) {
+	case string:
+		return source.fromUrl(v.(string))
+
+	case []byte:
+		return source.fromBytes(v.([]byte))
+
+	default:
+		log.Println("Unsupported type:", reflect.TypeOf(v))
+	}
+
+	return nil
+}
+
+func (this *Source) fromUrl(s string) *Source {
+	if s == "" {
+		return nil
+	}
+
 	var err error
-	v := i[0].([]interface{})[0].(string)
-
-	this := &Source{}
-
-	parts := strings.Split(v, "://")
+	parts := strings.Split(s, "://")
 
 	switch len(parts) {
 	case NOPROTO:
@@ -69,7 +87,7 @@ func (*Source) Construct(i ...interface{}) *Source {
 		break
 
 	default:
-		log.Printf("Wrong URL = '%v'\n", v)
+		log.Printf("Wrong URL = '%v'\n", s)
 		return nil
 	}
 
@@ -90,6 +108,20 @@ func (*Source) Construct(i ...interface{}) *Source {
 	this.Imgcfg, this.imgtype, err = image.DecodeConfig(bytes.NewReader(this.Blob()))
 	if err != nil {
 		log.Printf("Unable to DecodeConfig() for resource from %v. %v\n", this.Link(), err)
+		return nil
+	}
+
+	return this
+}
+
+func (this *Source) fromBytes(b []byte) *Source {
+	var err error
+
+	this.blob = b
+
+	this.Imgcfg, this.imgtype, err = image.DecodeConfig(bytes.NewReader(this.Blob()))
+	if err != nil {
+		log.Printf("Unable to DecodeConfig(). %v\n", this.Link(), err)
 		return nil
 	}
 

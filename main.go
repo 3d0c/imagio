@@ -46,7 +46,7 @@ func init() {
 }
 
 func main() {
-	dumpcfg := flag.Bool("dumpcfg", false, "Dump config")
+	dumpcfg := flag.Bool("dumpcfg", false, "Dump config.")
 
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stdout, "Usage: %s [OPTIONS]\n", os.Args[0])

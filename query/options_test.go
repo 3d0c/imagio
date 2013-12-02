@@ -141,36 +141,33 @@ func TestScale(t *testing.T) {
 	}
 }
 
-func TestCrop(t *testing.T) {
-	var crop *Crop
+func TestRoi(t *testing.T) {
+	var roi *Roi
 
 	original := &PixelDim{Width: 1024, Height: 768}
 
-	cases := map[string]*Crop{
+	cases := map[string]*Rect{
 		"":               nil,
-		"1,1,500,500":    &Crop{param: "user", Roi: &ROI{1, 1, 500, 500}},
-		"left,500,500":   &Crop{param: "left", Roi: &ROI{0, 0, 500, 500}},
-		"right,500,500":  &Crop{param: "right", Roi: &ROI{524, 0, 500, 500}},
-		"bleft,500,500":  &Crop{param: "bleft", Roi: &ROI{0, 268, 500, 500}},
-		"bright,500,500": &Crop{param: "bright", Roi: &ROI{524, 268, 500, 500}},
-		"center,500,500": &Crop{param: "center", Roi: &ROI{262, 134, 500, 500}},
+		"1,1,500,500":    &Rect{1, 1, 500, 500},
+		"left,500,500":   &Rect{0, 0, 500, 500},
+		"right,500,500":  &Rect{524, 0, 500, 500},
+		"bleft,500,500":  &Rect{0, 268, 500, 500},
+		"bright,500,500": &Rect{524, 268, 500, 500},
+		"center,500,500": &Rect{262, 134, 500, 500},
+		"500,500":        &Rect{500, 500, 0, 0},
 	}
 
 	for opt, expected := range cases {
-		crop = Construct(new(Crop), opt).(*Crop)
+		roi = Construct(new(Roi), opt).(*Roi)
 		if expected == nil {
-			if crop != nil {
-				t.Errorf("Expected nil, got %v\n", crop)
+			if roi != nil {
+				t.Errorf("Expected nil, got %v\n", roi)
 			}
 		} else {
-			if expected.param != crop.param {
-				t.Errorf("Expected param is %v, got %v\n", expected.param, crop.param)
-			}
+			result := roi.Calc(original)
 
-			crop.Calc(original)
-
-			if !reflect.DeepEqual(expected.Roi, crop.Roi) {
-				t.Errorf("Expected Roi is %v, got %v\n", expected.Roi, crop.Roi)
+			if !reflect.DeepEqual(expected, result) {
+				t.Errorf("Expected Roi is %v, got %v\n", expected, result)
 			}
 		}
 	}

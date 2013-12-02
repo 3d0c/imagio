@@ -14,6 +14,7 @@ const (
 	FORMAT     = "jpeg"
 	METHOD     = 3
 	QUALITY    = 80
+	ALPHA      = 0.5
 	LISTEN_ON  = "127.0.0.1:15900"
 	CACHE_SELF = "http://127.0.0.1:9100"
 )
@@ -25,7 +26,8 @@ var defaultCfg string = `
     "defaults" : {
         "format"  : "jpeg",
         "method"  : 3,
-        "quality" : 80
+        "quality" : 80,
+        "alpha"   : 0.5
     },
 
     "source" : {
@@ -62,9 +64,10 @@ type Config struct {
 	} `json:"source"`
 
 	Defaults struct {
-		Format  string `json:"format"`
-		Method  int    `json:"method"`
-		Quality int    `json:"quality"`
+		Format  string  `json:"format"`
+		Method  int     `json:"method"`
+		Quality int     `json:"quality"`
+		Alpha   float64 `json:"blend_alpha"`
 	} `json:"defaults"`
 
 	GroupCache struct {
@@ -72,6 +75,12 @@ type Config struct {
 		Peers []string `json:"peers"`
 		Size  string   `json:"size"`
 	} `json:"groupcache"`
+
+	Blend struct {
+		With string `json:"with"`
+		Mask string `json:"mask"`
+		Roi  string `json:roi`
+	}
 }
 
 var cfgptr *Config
@@ -228,4 +237,36 @@ func (this *Config) Quality() int {
 	}
 
 	return this.Defaults.Quality
+}
+
+func (this *Config) Alpha() float64 {
+	if this.Defaults.Alpha == 0 {
+		return ALPHA
+	}
+
+	return this.Defaults.Alpha
+}
+
+func (this *Config) BlendWith(s string) string {
+	if s != "" {
+		return s
+	}
+
+	return this.Blend.With
+}
+
+func (this *Config) BlendMask(s string) string {
+	if s != "" {
+		return s
+	}
+
+	return this.Blend.Mask
+}
+
+func (this *Config) BlendRoi(s string) string {
+	if s != "" {
+		return s
+	}
+
+	return this.Blend.Roi
 }
