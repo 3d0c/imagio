@@ -219,4 +219,3 @@ Note,
 | `&source=` | `&blend_with=`  | result |
 |:------:|:-----------:|:------:|
 | ![base](https://raw.github.com/wiki/3d0c/imagio/assets/sample250.jpg) | ![foreground](https://raw.github.com/wiki/3d0c/imagio/assets/awesome.jpg) | ![result](https://raw.github.com/wiki/3d0c/imagio/assets/sample250weighted.jpeg) | 
-
