@@ -65,10 +65,10 @@ func resize(o *Options, zoom *PixelDim, roi *Rect) []byte {
 	var data []byte
 
 	result := C.resizer(
-		(*_Ctype_Blob)(unsafe.Pointer(blobptr(o.Base))),
-		(*_Ctype_PixelDim)(unsafe.Pointer(zoom)),
+		(*C.Blob)(unsafe.Pointer(blobptr(o.Base))),
+		(*C.PixelDim)(unsafe.Pointer(zoom)),
 		C.int(o.Quality), C.int(o.Method), C.CString("."+o.Format),
-		(*_Ctype_CvRect)(initCvRect(roi)),
+		(*C.CvRect)(initCvRect(roi)),
 	)
 
 	if result != nil {
@@ -101,11 +101,11 @@ func blend(base *Source, o *Options, roi *Rect) []byte {
 	}
 
 	result := C.blender(
-		(*_Ctype_Blob)(blobptr(base)),
-		(*_Ctype_Blob)(blobptr(o.Foreground)),
-		(*_Ctype_Blob)(blobptr(o.Mask)),
+		(*C.Blob)(blobptr(base)),
+		(*C.Blob)(blobptr(o.Foreground)),
+		(*C.Blob)(blobptr(o.Mask)),
 		C.int(o.Quality), C.CString("."+o.Format), C.float(o.Alpha),
-		(*_Ctype_CvRect)(rect),
+		(*C.CvRect)(rect),
 	)
 
 	if result != nil {
