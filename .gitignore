@@ -2,3 +2,4 @@ libs/
 include/
 build-static.sh
 imagio.conf
+imagio
